@@ -347,9 +347,9 @@ Now, we should see that the new individuals, in black, are printed last and thus
 
 ### Reversing Axes
 
-You may notice now we are getting close to recreating the original plot from Lamnidis *et al*.. One issue is that the ordination of the points, are flipped compared to the original plot - i.e. not in the classic 'genetic structure PCAs of Europeans match that of geographic positioning of the populations'.
+You may notice now we are getting close to recreating the original plot from Lamnidis *et al*.. One issue is that the ordination of the points, are flipped compared to the original plot - i.e. not in the classic 'PC orientation matches cardinal directions'.
 
-We can correct this in a similar fashion to how we re-ordered the way the plots are displayed, by reversing the column. However, as we don't want to override the ordering of the points based on the factors, we can use a little trick to reverse the axes. As the issue is basically the PCA algorthims randomly pick which postive or negative direction similar plots point, we can use convert minus values to positive and positive to minus by saying the *column itself* is negative (thus flipping all values). E.g. if we change `PC1` to `-PC1`, we should see a `-1` point on the X axis becoming `1` and vice versa.
+We can correct this in a similar fashion to how we re-ordered the way the plots are displayed, by flipping the sign of the column's contents. As the issue stems from the fact the PCA algorthims randomly pick the postive or negative direction in each PC, we can convert negative values to positive and positive to negative by taking the negative of the *column itself* (thus flipping the sign of all values). E.g. if we change `PC1` to `-PC1`, we should see a `-1` point on the X axis becoming `1` and vice versa.
 
 ``` r
 ggplot(data = data_combined %>% arrange(desc(Population)), 
