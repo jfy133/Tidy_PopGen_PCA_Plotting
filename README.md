@@ -24,13 +24,13 @@ March 2019
 Introduction
 ------------
 
-This notebook explains how to make a PCA scatter plot typically used in ancient human population genetics in R using the `tidyverse` collection of packages. The notebook is aimed at those who are pretty new to R, but have a basic knowledge of how things work (e.g. how to assign a variable, a general idea of what a vector is)
+This notebook explains how to make a PCA scatter plot typically used in ancient human population genetics in R, using the `tidyverse` collection of packages. The notebook is aimed at those who are pretty new to R, but have a basic knowledge of how things work (e.g. how to assign a variable, a general idea of what a vector is).
 
 The challenge in this type of plot is that you often have many different populations which you want to distinguish between - typically by colours. But on top of this, in aDNA studies, you want to distinguish between modern and ancient individuals - such as by point shape - and emphasise these ancient or new populations over the modern reference dataset.
 
 > In particular, people who try this themselves get stuck when making a nice legend, as the popular plotting package ggplot2 prefers to make a legend for colours and shapes separately - which can take up a lot of space.
 
-Here I aim to gently introduce some basic tools and procedures to prepare data for plotting using `tidyverse` functions, and then how to step by step build a final PCA plot in ggplot2. that can be used for presentation.
+Here I aim to gently introduce some basic tools and procedures to prepare data for plotting using `tidyverse` functions, and then how to step by step build a final PCA plot in ggplot2, that can be used for presentation.
 
 Why tidyverse? All the packages in this collection follow very strict rules on how functions should work and be design. The overall aim is to make R code much more readable and intuitive to both coders and users.
 
@@ -180,7 +180,7 @@ data_combined <- left_join(data_pca, data_meta) %>% print()
 
 Here we can see, two more tidyverse tricks:
 
-1.  A 'pipe', indicated by `%>%`, from the `magrittr` package (included in dplyr). This works like in the terminal, and just says the output of the first function should be passed into the first argument position of the next function. This makes code much more readable going left to right step by step rather than 'nesting' of functions as we normally see in R.
+1.  A 'pipe', indicated by `%>%`, from the `magrittr` package (included in dplyr). This works like pipes (`|`) do in the terminal, and just says the output of the first function should be passed into the first argument position of the next function. This makes code much more readable going left to right step by step rather than 'nesting' of functions as we normally see in R.
 
 2.  We can simultaneously *assign* to a variable the output of a function, and print the final result by piping our join function into `print()`.
 
@@ -190,11 +190,11 @@ Next we want to 'hard-code' the order of populations as they are in in our raw d
 
 To hard code this we can convert the 'Population' column of our data from a *character* to *factor*. A factor is an object which allows you to hardcode the ordering of that list other than alphabetical order by setting your own hierarchy.
 
-As our loaded data is already in the order we want to plot (based on population similarity), we can use ta nifty function from the `forcats` package called `as_factor()` to generate our hierarchy based on the order row order that the Population column is already in.
+As our loaded data is already in the order we want to plot (based on population similarity), we can use a nifty function from the `forcats` package called `as_factor()` to generate our hierarchy based on the order row order that the Population column is already in.
 
 > Note that if your two data files do not have the same order in the Population column, the `left_join()` function we applied above will take the first tibble's (or left tibble) column order as precendence over the second! Make sure both are in the same order, or try `right_join()` instead.
 
-Again, using the tibble 'preview' functionality, we can check that the Population column type has changed from character (`chr`) to factor (`fctr`)
+Again, using the tibble 'preview' functionality, we can check that the Population column type has changed from character (`chr`) to factor (`fctr`).
 
 ``` r
 data_combined <- data_combined %>%
@@ -223,7 +223,7 @@ which is indeed the case.
 
 With this dataframe, we have almost everything ready for plotting. In principle we could already plot our PCA. However, as mentioned in the introduction, we have the problem of having separate legends - one per 'aesthetic'.
 
-To deal with this issue, we need to collect more data from some of aesthetic columns from the Aesthetic data we loaded at the beginning. These allows us to 'hard-code' our colours and shapes to exactly as we want it (rather than ggplot2 randomly a assigning colours for us).
+To deal with this issue, we need to collect more data from some of aesthetic columns from the Aesthetic data we loaded at the beginning. These allows us to 'hard-code' our colours and shapes to exactly as we want it (rather than ggplot2 randomly assigning colours for us).
 
 To do this we need to make a 'named' vector, i.e. a list of a named keys (the population) and a value assigned to each key (the colour or shape you want that population to have). For example: `key1 = "value1", key2 = "value2"`
 
@@ -255,7 +255,7 @@ So onto the plot itself. Following the [layered grammar of graphics](https://vit
 
 ### Blank Canvas
 
-The first step is provide the basic data that will inform the the various component of the plot. Then we specify the specific 'aesthetics' of the plot by supplying the columns that will inform the X and Y coordinates of each data point, what column we want to colour the points by, and so on to the `aes()` function.
+The first step is to provide the basic data that will inform the various components of the plot. Then we specify the specific 'aesthetics' of the plot by supplying the columns that will inform the X and Y coordinates of each data point, what column we want to colour the points by, and so on to the `aes()` function.
 
 ``` r
 ggplot(data = data_combined, 
@@ -323,7 +323,7 @@ ggplot(data = data_combined,
 
 ### Points Of Interest On Top?
 
-Unfortunately, in our Population column, we had the new individuals from the Lamnidis *et al.* study as the first few populations in the data. This then means that these individuals would be plotted first and ends up underneath other populations, despite being the ones we would like to emphasise the most. You can see this with JK1963 (the black asterix) falling beneath one of the green points near the centre of the plot.
+Unfortunately, in our Population column, we had the new individuals from the Lamnidis *et al.* study as the first few populations in the data. This then means that these individuals would be plotted first and end up underneath other populations, despite being the ones we would like to emphasise the most. You can see this with JK1963 (the black asterisk) falling beneath one of the green points near the centre of the plot.
 
 We can simply fix this by arranging the Population column in our data in reverse order. This will then cause the last Populations in the tibble to be printed first, and the ones at the top of the original data (the individuals of interest) first.
 
@@ -363,9 +363,9 @@ ggplot(data = data_combined %>% arrange(desc(Population)),
 
 ### Reducing Ink
 
-A major inspiration for modern figure design is from Edward Tufte who had a overriding principle of 'minimising ink'. In the old days of printed material this saved resources and money, but also an additional benefit of making sure to minimise as much distraction away from the data as possible.
+A major inspiration for modern figure design is from Edward Tufte who had an overriding principle of 'minimising ink'. In the old days of printed material this saved resources and money, but also has an additional benefit of making sure to minimise as much distraction away from the data as possible.
 
-`ggplot2` provides a few additional 'global themes' along these lines. The closest one to the Lamnidis *et al*. paper is `theme_classic()`, which we can add as an extra aesthetic layer (although your remember your personal customisations retain precendence over this.)
+`ggplot2` provides a few additional 'global themes' along these lines. The closest one to the Lamnidis *et al*. paper is `theme_classic()`, which we can add as an extra aesthetic layer (although your remember your personal customisations retain precendence over this).
 
 ``` r
 ggplot(data = data_combined %>% arrange(desc(Population)), 
@@ -384,11 +384,11 @@ At the moment, the PCA looks a little cramped because the legend is so large. We
 
 Legends are known as 'guides' in `ggplot2`, so we can add another layer called `guides()` to indicate we want to customise this particular aspect of the plot. Within this layer, we don't need to use `aes()` as we don't want to customise by data columns themselves, but rather a user specified customisation that applies to every data point.
 
-The next bit is a bit complicated but bare with me.
+The next part is a bit complicated but bare with me.
 
 Within `guides()` we firstly need to specify which legend we want to customise. As we've actually 'collapsed' the two legends we would normally have: one for colour and one for shapes (as they use the same column), we can just pick the `colour` aesthetic variable.
 
-Within here we use a second function called `guide_legends()` which is used to translate the customisaion within the function to *just* to ones that are valid to legends. Here we specify we want 6 columns in the legend.
+Within here we use a second function called `guide_legends()`, which is used to translate the customisation within the function to *just* to ones that are valid to legends. Here we specify we want 6 columns in the legend.
 
 We also want to make the population labels in the legend smaller. For this we need to specify `label.theme()` so we customise only that aspect of the legend. We also need to use customisations that apply only to test, for this we use `element_text()` and set the size variable to the smaller font size.
 
@@ -409,7 +409,7 @@ Now we have a much more equal plot to legend ratio.
 Now over to you!
 ----------------
 
-The steps above are generally applicable to most scatter-plot like data, thus in principle if you open this notebook in Rstudio yourself, and change each code block to your own specifications - whether changing the order of the axes, or instead plotting PC2 and PC3 - you will generate a nice clear plot as above but with your data instead.
+The steps above are generally applicable to most scatter-plot like data, thus in principle if you open this notebook in Rstudio yourself, and change each code block to your own specifications - whether changing the order of the axes, or instead plotting PC2 and PC3 - you will generate a nice clear plot as above, but with your data instead.
 
 The main thing to remember is that your input data that you load into the R session should have your Population column in the order you want the points to be displayed in. Otherwise, just compare your input data to the ones included in this repository and follow the same formatting of the data.
 
