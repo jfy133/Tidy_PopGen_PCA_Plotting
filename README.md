@@ -5,7 +5,7 @@ March 2019
 
 ## Description
 
-This repository is for a notebook explains how to make a PCA scatter plot 
+This repository is for a that notebook explains how to make a PCA scatter plot 
 typically used in ancient human population genetics in R, using the `tidyverse` 
 collection of packages. 
 
