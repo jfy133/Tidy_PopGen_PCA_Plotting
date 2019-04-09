@@ -3,6 +3,11 @@
 James A. Fellows Yates (<jfy133@gmail.com>) (with Contributions from [Theseus Lamnidis](https://github.com/TCLamnidis))
 March 2019
 
+## Table of Contents
+1. [Description](#description)
+2. [To use](#to-use)
+3. [License](#license)
+
 ## Description
 
 This repository is for a that notebook explains how to make a PCA scatter plot 
