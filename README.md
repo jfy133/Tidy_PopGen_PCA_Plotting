@@ -15,13 +15,13 @@ what a vector is, how to install a R library).
 
 ## To use 
 
-To view the notebook please see the [`.md` file](https://github.com/jfy133/Tidy_PopGen_PCA_Plotting/blob/master/Tidy_PopGen_PCA_Plotting.md).
+To view the notebook in your browser please see the [`.md` file](https://github.com/jfy133/Tidy_PopGen_PCA_Plotting/blob/master/Tidy_PopGen_PCA_Plotting.md).
 
 To run the notebook yourself, please clone (i.e. download) the repository to 
 your own computer using the command below, and run within the `.Rmd` file in 
 Rstudio. 
 
-```
+```bash
 git clone https://github.com/jfy133/Tidy_PopGen_PCA_Plotting.git
 ```
 
