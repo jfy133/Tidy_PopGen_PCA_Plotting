@@ -11,10 +11,10 @@ output:
 ## Introduction
 
 This notebook explains how to make a PCA scatter plot typically used in ancient
-human population genetics in R using the `tidyverse` collection of packages. 
+human population genetics in R, using the `tidyverse` collection of packages. 
 The notebook is aimed at those who are pretty new to R, but have a basic 
 knowledge of how things work (e.g. how to assign a variable, a general idea of
-what a vector is)
+what a vector is).
 
 The challenge in this type of plot is that you often have many different 
 populations which you want to distinguish between - typically by colours. But
@@ -28,7 +28,7 @@ colours and shapes separately - which can take up a lot of space.
 
 Here I aim to gently introduce some basic tools and procedures to prepare data
 for plotting using `tidyverse` functions, and then how to step by step build
-a final PCA plot in ggplot2. that can be used for presentation.
+a final PCA plot in ggplot2, which can be used for presentation.
 
 Why tidyverse? All the packages in this collection follow very strict rules
 on how functions should work and be design. The overall aim is to make R code
@@ -123,10 +123,10 @@ data_combined <- left_join(data_pca, data_meta) %>% print()
 Here we can see, two more tidyverse tricks:
  
 1. A 'pipe', indicated by `%>%`, from the `magrittr` package (included in 
-dplyr).  This works like in the terminal, and just says the output of the 
-first function should be passed into the first argument position of the next 
-function. This makes code much more readable going left to right step by step 
-rather than 'nesting' of functions as we normally see in R. 
+dplyr).  This works like pipes (`|`) do in the terminal, and just says the 
+output of the first function should be passed into the first argument position 
+of the next function. This makes code much more readable going left to right 
+step-by-step rather than 'nesting' of functions as we normally see in R. 
 
 2. We can simultaneously _assign_ to a variable the output of a function, 
 and print the final result by piping our join function into `print()`.
@@ -143,7 +143,7 @@ hardcode the ordering of that list other than alphabetical order by setting
 your own hierarchy.
 
 As our loaded data is already in the order we want to plot (based on population 
-similarity), we can use ta nifty function from the `forcats` package called
+similarity), we can use a nifty function from the `forcats` package called
 `as_factor()` to generate our hierarchy based on the order row order that the 
 Population column is already in.
 
@@ -153,7 +153,7 @@ tibble's (or left tibble) column order as precendence over the second! Make
 sure both are in the same order, or try `right_join()` instead.
 
 Again, using the tibble 'preview' functionality, we can check that the 
-Population column type has changed from character (`chr`) to factor (`fctr`) 
+Population column type has changed from character (`chr`) to factor (`fctr`).
 
 ```{r}
 data_combined <- data_combined %>%
@@ -172,7 +172,7 @@ have the problem of having separate legends - one per 'aesthetic'.
 To deal with this issue, we need to collect more data from some of aesthetic 
 columns from the Aesthetic data we loaded at the beginning. These allows us to 
 'hard-code' our colours and shapes to exactly as we want it (rather than 
-ggplot2 randomly a assigning colours for us). 
+ggplot2 randomly assigning colours for us). 
 
 To do this we need to make a 'named' vector, i.e. a list of a named keys 
 (the population) and a value assigned to each key (the colour or shape you want 
@@ -208,8 +208,8 @@ multiple layers that overlay each other.
 
 ### Blank Canvas
 
-The first step is provide the basic data that will inform the the various 
-component of the plot. Then we specify the specific 'aesthetics' of the plot by 
+The first step is to provide the basic data that will inform the various 
+components of the plot. Then we specify the specific 'aesthetics' of the plot by 
 supplying the columns that will inform the X and Y coordinates of each data 
 point, what column we want to colour the points by, and so on to the `aes()` 
 function.
@@ -293,9 +293,9 @@ ggplot(data = data_combined,
 
 Unfortunately, in our Population column, we had the new individuals from the 
 Lamnidis _et al._ study as the first few populations in the data. This then
-means that these individuals would be plotted first and ends up underneath 
+means that these individuals would be plotted first and end up underneath 
 other populations, despite being the ones we would like to emphasise the most. 
-You can see this with JK1963 (the black asterix) falling beneath one of the 
+You can see this with JK1963 (the black asterisk) falling beneath one of the 
 green points near the centre of the plot.
 
 We can simply fix this by arranging the Population column in our data in reverse
@@ -336,19 +336,18 @@ this out for this notebook.
 
 ### Reversing Axes
 
-You may notice now we are getting close to recreating the original plot from
-Lamnidis _et al_.. One issue is that the ordination of the points, are flipped
-compared to the original plot - i.e. not in the classic 'genetic structure
-PCAs of Europeans match that of geographic positioning of the populations'.
+You may notice now we are getting close to recreating the original plot from 
+Lamnidis *et al*.. One issue is that the ordination of the points, are flipped 
+compared to the original plot - i.e. not in the classic 'PC orientation matches 
+cardinal directions'.
 
-We can correct this in a similar fashion to how we re-ordered the way the plots
-are displayed, by reversing the column. However, as we don't want to override 
-the ordering of the points based on the factors, we can use a little trick
-to reverse the axes. As the issue is basically the PCA algorthims randomly
-pick which postive or negative direction similar plots point, we can use
-convert minus values to positive and positive to minus by saying the 
-_column itself_ is negative (thus flipping all values). E.g. if we change `PC1`
-to `-PC1`, we should see a `-1` point on the X axis becoming `1` and vice versa.
+We can correct this in a similar fashion to how we re-ordered the way the plots 
+are displayed, by flipping the sign of the column's contents. As the issue 
+stems from the fact the PCA algorthims randomly pick the postive or negative 
+direction in each PC, we can convert negative values to positive and positive 
+to negative by taking the negative of the *column itself* (thus flipping the 
+sign of all values). E.g. if we change `PC1` to `-PC1`, we should see a `-1` 
+point on the X axis becoming `1` and vice versa.
 
 ```{r fig.height=7, fig.width=14}
 ggplot(data = data_combined %>% arrange(desc(Population)), 
@@ -360,15 +359,16 @@ ggplot(data = data_combined %>% arrange(desc(Population)),
 
 ### Reducing Ink
 
-A major inspiration for modern figure design is from Edward Tufte who had a 
-overriding principle of 'minimising ink'. In the old days of printed material 
-this saved resources and money, but also an additional benefit of making sure
-to minimise as much distraction away from the data as possible.
+A major inspiration for modern figure design is from 
+[Edward Tufte](https://en.wikipedia.org/wiki/Edward_Tufte#Information_design) 
+who has an overriding principle of 'minimising ink'. In the old days of printed 
+material this saved resources and money, but also has an additional benefit of 
+making sure to minimise as much distraction away from the data as possible.
 
 `ggplot2` provides a few additional 'global themes' along these lines. The 
 closest one to the Lamnidis _et al_. paper is `theme_classic()`, which we
 can add as an extra aesthetic layer (although your remember your personal 
-customisations retain precendence over this.)
+customisations retain precendence over this).
 
 ```{r fig.height=7, fig.width=14}
 ggplot(data = data_combined %>% arrange(desc(Population)), 
@@ -391,15 +391,15 @@ Within this layer, we don't need to use `aes()` as we don't want to customise
 by data columns themselves, but rather a user specified customisation that 
 applies to every data point.
 
-The next bit is a bit complicated but bare with me.
+The next part is a bit complicated but bare with me.
 
 Within `guides()` we firstly need to specify which legend we want to customise.
 As we've actually 'collapsed' the two legends we would normally have: one for
 colour and one for shapes (as they use the same column), we can just pick the
 `colour` aesthetic variable.
 
-Within here we use a second function called `guide_legends()` which is used to
-translate the customisaion within the function to _just_ to ones that are
+Within here we use a second function called `guide_legends()`, which is used to
+translate the customisation within the function to _just_ to ones that are
 valid to legends. Here we specify we want 6 columns in the legend. 
 
 We also want to make the population labels in the legend smaller. For this we
@@ -425,7 +425,7 @@ Now we have a much more equal plot to legend ratio.
 The steps above are generally applicable to most scatter-plot like data, thus
 in principle if you open this notebook in Rstudio yourself, and change each 
 code block to your own specifications - whether changing the order of the axes,
-or instead plotting PC2 and PC3 - you will generate a nice clear plot as above 
+or instead plotting PC2 and PC3 - you will generate a nice clear plot as above, 
 but with your data instead.
 
 The main thing to remember is that your input data that you load into the R 
