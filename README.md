@@ -1,6 +1,6 @@
 # Tutorial: (Ancient) Population Genetics PCA Plotting in R and Tidyverse
 
-James A. Fellows Yates (<jfy133@gmail.com>) (with Contributions from [Theseus Lamnidis](https://github.com/TCLamnidis))
+James A. Fellows Yates (<jfy133@gmail.com>) (with contributions from [Theseus Lamnidis](https://github.com/TCLamnidis))
 March 2019
 
 ## Table of Contents
