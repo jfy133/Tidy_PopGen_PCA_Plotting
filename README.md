@@ -18,7 +18,7 @@ The notebook is aimed at those who are pretty new to R, but have a basic
 knowledge of how things work (e.g. how to assign a variable, a general idea of 
 what a vector is, how to install a R library).
 
-![Example output(Tidy_PopGen_PCA_Plotting_files/figure-markdown_github/unnamed-chunk-15-1.png)
+![Example output](Tidy_PopGen_PCA_Plotting_files/figure-markdown_github/unnamed-chunk-15-1.png)
 <p align="center">
   <b>Example output!</b>
 </p>
