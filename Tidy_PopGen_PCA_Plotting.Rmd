@@ -200,7 +200,7 @@ head(list_colour)
 object, so using `print()` it would end up printing the entire contents of the 
 object to screen. `head()` will only print the first few entries of any object.
 
-## Plotting
+## Plotting with points
 
 So onto the plot itself. Following the [layered grammar of graphics](https://vita.had.co.nz/papers/layered-grammar.html) principles which 
 the `ggplot2` package is based on, we will build our figures in the form of 
@@ -419,6 +419,221 @@ ggplot(data_combined %>% arrange(desc(Population)),
 ```
 
 Now we have a much more equal plot to legend ratio.
+
+## My legends are still to large! Text instead of points?
+
+Now you may be thinking this is nice, except the legend is still way too big
+and takes up too much space e.g. when publishing in a journal article, report
+or thesis.
+
+### With `geom_text()`
+
+Instead, we could try and collapse the information of the coordinates on the
+PCA and the populations together by replacing the points on the PCA with 
+the population actual names of the population each individual belongs to.
+
+This requires a few minor changes to our code, however following the same 
+concepts as before.
+
+There are a few things we need to do:
+1. Replace the `shape =` aesthetic (as we won't be using points anymore) to the
+`label = ` varible.
+2. Replace our `geom_point()` layer with `geom_text()`
+3. Remove our `scale_shape_manual()` layer (as we aren't using the points)
+4. Turn off the legend by removing `guides()`, and adding a new layer 
+`theme()` at the end, and setting the variable `legend.position` to `"none"`. 
+Note that `theme()` is a 'global' layer and applies to all legends, unlike
+`guides()` which allowed customisation of each particular legend.
+
+```{r}
+ggplot(data_combined %>% arrange(desc(Population)), 
+       aes(-PC1, -PC2, colour = Population, label = Population)) + 
+  geom_text() + 
+  scale_colour_manual(values = list_colour) + 
+  theme_classic() +
+  theme(legend.position = "none")
+```
+
+> Here I have just used the whole population name as recorded in the data 
+and aesthetic files. It is common in population genetics to use three letter
+codes instead. We can easily apply the same thing here by adding a new column e.g. 
+"Code" to the "aesthetics" input file we loaded at the beginning with the three
+letter codes, and changing the `colour` and `label` variable in `ggplot()` from
+"Population" to "Code"
+
+### With `geom_label()`
+
+This still isn't as clear as there is a lot of text and they are overlapping 
+eachother into oblivion in some places. As an alternative, we can try 
+using `geom_label()` instead of the `geom_text()` layer.
+
+```{r}
+ggplot(data_combined %>% arrange(desc(Population)), 
+       aes(-PC1, -PC2, colour = Population, label = Population)) + 
+  geom_label() + 
+  scale_colour_manual(values = list_colour) + 
+  theme_classic() +
+  theme(legend.position = "none")
+```
+
+### Fixing overplotting
+
+This is better as we can read the text, but we still have a lot of 
+overlapping points.
+
+One final option we have is make two layers, one text for the 
+background points, and then another layer of points for the new individuals. This way we can see at fine resolution where the new individuals fall, but
+on top of the general population it falls in.
+
+This requires a slightly more complex procedure, as we don't want to plot 
+the new individuals with `geom_text()` at the same time as the comparative
+populations - as we won't be able to see the black points in the overplotted 
+labels of those individuals.
+
+#### Extra data manipulation
+
+Therefore, we need to supply 'filtered' data to both layers, and apply
+the aesthetics to each layer independently.
+
+For filtering, we need to make a record of the new populations which we
+want to plot on the new layer. We can record these in a vector:
+
+```{r}
+new_pops <- c("BolshoyOleniOstrov", "ChalmnyVarre", "JK1963", "JK1967", 
+              "Levanluhta", "JK2065", "JK2066", "JK2067", "ModernSaami")
+```
+
+Next, we need to split our data into two: one for the background, one for the
+foreground - using our new vector within `dlpyr`'s `filter()` function in 
+combination with the conditional expression function `%in%`.
+
+The way this works is :
+
+1. we pipe our data into `filter()`
+2. Say which column of our data we want to apply the filter on.
+3. Say how we want to filter. In the first case, we want to find any row in 
+our filtering column that matches any entry `%in%` our vector.
+4. Print the resulting tibble to check we see have only those individuals
+
+```{r}
+data_foreground <- data_combined %>% 
+  filter(Population %in% new_pops) %>% 
+  print()
+```
+
+And as expected, we see we now only have 16 rows in this new `tibble`.
+
+Next we want to do the same filtering but this time inverted - i.e. keep
+everything that is _not_ the new individuals. For this we can just add `!` to
+the beginning of the expression.
+
+```{r}
+data_background <- data_combined %>% 
+  filter(!Population %in% new_pops) %>% 
+  print()
+```
+
+#### Plotting two layers
+
+Back with `ggplot2` we can plot the two layers independently by moving the 
+new sets of input data from the `ggplot` function to the `geom_*` layers 
+(leaving `ggplot()` empty), along with their corresponding aesthetics 
+(which we borrow from above - such as `scale_shape_manual()`).
+
+```{r}
+ggplot() + 
+  geom_text(data = data_background, aes(x = -PC1, y = -PC2, colour = Population, label = Population)) + 
+  geom_point(data = data_foreground, aes(x = -PC1, y = -PC2, colour = Population, shape = Population)) +
+  scale_colour_manual(values = list_colour) + 
+  scale_shape_manual(values = list_shape) +
+  theme_classic() +
+  theme(legend.position = "none")
+
+```
+
+This is getting slightly better, however it's still a bit difficult to see
+the points over the populatons. We can improve on this by reducing the 
+'strength' of the colours of the background populations, but also make the 
+points of our new individuals bigger.
+
+For the former, we can add an extra variable to the `geom_text()` layer
+called `alpha` which sets a transparency level to the text. In this case we 
+will _not_ put this within `aes()`, as we don't want the data to inform 
+level of transparency, but rather we want to hard code this to apply to all
+populations.
+
+```{r}
+ggplot() + 
+  geom_text(data = data_background, 
+            aes(x = -PC1, y = -PC2, colour = Population, label = Population), 
+            alpha = 0.4) + 
+  geom_point(data = data_foreground, 
+             aes(x = -PC1, y = -PC2, colour = Population, shape = Population)) +
+  scale_colour_manual(values = list_colour) + 
+  scale_shape_manual(values = list_shape) +
+  theme_classic() +
+  theme(legend.position = "none")
+```
+
+Now we will change the `size` of the points within the `geom_point()` layer, 
+again _outside_ the aeshetics as we want to hard code this to apply to all 
+points.
+
+```{r}
+ggplot() + 
+  geom_text(data = data_background, 
+            aes(x = -PC1, y = -PC2, colour = Population, label = Population), 
+            alpha = 0.4) + 
+  geom_point(data = data_foreground, 
+             aes(x = -PC1, y = -PC2, colour = Population, shape = Population), 
+             size = 2) +
+  scale_colour_manual(values = list_colour) + 
+  scale_shape_manual(values = list_shape) +
+  theme_classic() +
+  theme(legend.position = "none")
+```
+
+We can also improve the points visibility by making the lines of the shapes
+thicker by increasing the `stroke` variable.
+
+```{r}
+ggplot() + 
+  geom_text(data = data_background, 
+            aes(x = -PC1, y = -PC2, colour = Population, label = Population), 
+            alpha = 0.4) + 
+  geom_point(data = data_foreground, 
+             aes(x = -PC1, y = -PC2, colour = Population, shape = Population), 
+             size = 2, stroke = 0.7) +
+  scale_colour_manual(values = list_colour) + 
+  scale_shape_manual(values = list_shape) +
+  theme_classic() +
+  theme(legend.position = "none")
+```
+
+Finally, while we can (sort of) see the names of the reference populations, we
+have no idea which populations the points of the new individuals refer to.
+For this we can add the legend back in (as it's comparatively few populations
+compared to the comparative data), however we need to make sure we only 
+show the legend for the `geom_point()` layer.
+
+We can remove the `theme()` layer because it was a 'global' layer and we want
+to now tweak different legends, and replace it with `guides()` again.
+
+```{r}
+ggplot() + 
+  geom_text(data = data_background, 
+            aes(x = -PC1, y = -PC2, colour = Population, label = Population), 
+            alpha = 0.4) + 
+  geom_point(data = data_foreground, 
+             aes(x = -PC1, y = -PC2, colour = Population, shape = Population), 
+             size = 2, stroke = 0.7) +
+  scale_colour_manual(values = list_colour) + 
+  scale_shape_manual(values = list_shape) +
+  theme_classic() +
+  guides(color = FALSE, size = FALSE)
+
+```
+
 
 ## Now over to you!
 
