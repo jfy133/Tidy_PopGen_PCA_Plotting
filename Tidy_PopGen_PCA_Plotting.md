@@ -10,7 +10,7 @@ March 2019
     -   [Combining Data](#combining-data)
     -   [Ordering Populations](#ordering-populations)
     -   [Custom Aesthetic Data](#custom-aesthetic-data)
--   [Plotting](#plotting)
+-   [Plotting with points](#plotting-with-points)
     -   [Blank Canvas](#blank-canvas)
     -   [Point Layer](#point-layer)
     -   [Colouring](#colouring)
@@ -19,18 +19,22 @@ March 2019
     -   [Reversing Axes](#reversing-axes)
     -   [Reducing Ink](#reducing-ink)
     -   [Fixing Large Legends](#fixing-large-legends)
+-   [My legends are still to large! Text instead of points?](#my-legends-are-still-to-large-text-instead-of-points)
+    -   [With `geom_text()`](#with-geom_text)
+    -   [With `geom_label()`](#with-geom_label)
+    -   [Fixing overplotting](#fixing-overplotting)
 -   [Now over to you!](#now-over-to-you)
 
 Introduction
 ------------
 
-This notebook explains how to make a PCA scatter plot typically used in ancient human population genetics in R using the `tidyverse` collection of packages. The notebook is aimed at those who are pretty new to R, but have a basic knowledge of how things work (e.g. how to assign a variable, a general idea of what a vector is)
+This notebook explains how to make a PCA scatter plot typically used in ancient human population genetics in R, using the `tidyverse` collection of packages. The notebook is aimed at those who are pretty new to R, but have a basic knowledge of how things work (e.g. how to assign a variable, a general idea of what a vector is).
 
 The challenge in this type of plot is that you often have many different populations which you want to distinguish between - typically by colours. But on top of this, in aDNA studies, you want to distinguish between modern and ancient individuals - such as by point shape - and emphasise these ancient or new populations over the modern reference dataset.
 
 > In particular, people who try this themselves get stuck when making a nice legend, as the popular plotting package ggplot2 prefers to make a legend for colours and shapes separately - which can take up a lot of space.
 
-Here I aim to gently introduce some basic tools and procedures to prepare data for plotting using `tidyverse` functions, and then how to step by step build a final PCA plot in ggplot2. that can be used for presentation.
+Here I aim to gently introduce some basic tools and procedures to prepare data for plotting using `tidyverse` functions, and then how to step by step build a final PCA plot in ggplot2, which can be used for presentation.
 
 Why tidyverse? All the packages in this collection follow very strict rules on how functions should work and be design. The overall aim is to make R code much more readable and intuitive to both coders and users.
 
@@ -129,20 +133,20 @@ data_pca
 data_meta
 ```
 
-    ## # A tibble: 147 x 3
+    ## # A tibble: 140 x 3
     ##    Population         colorNr symbolNr
     ##    <chr>              <chr>      <dbl>
-    ##  1 BolshoyOleniOstrov black          0
-    ##  2 BolshoyOleniOstrov black          1
-    ##  3 BolshoyOleniOstrov black          2
-    ##  4 BolshoyOleniOstrov black          3
-    ##  5 BolshoyOleniOstrov black          4
-    ##  6 BolshoyOleniOstrov black          5
-    ##  7 ChalmnyVarre       black          6
-    ##  8 ChalmnyVarre       black          7
-    ##  9 JK1963             black          8
-    ## 10 JK1967             black          9
-    ## # … with 137 more rows
+    ##  1 BolshoyOleniOstrov black          1
+    ##  2 ChalmnyVarre       black          2
+    ##  3 JK1963             black          3
+    ##  4 JK1967             black          4
+    ##  5 Levanluhta         black          5
+    ##  6 JK2065             black          6
+    ##  7 JK2066             black          7
+    ##  8 JK2067             black          8
+    ##  9 ModernSaami        black          9
+    ## 10 Finnish            purple4        0
+    ## # … with 130 more rows
 
 Data Cleaning
 -------------
@@ -163,24 +167,24 @@ data_combined <- left_join(data_pca, data_meta) %>% print()
 
     ## Joining, by = "Population"
 
-    ## # A tibble: 1,500 x 8
+    ## # A tibble: 1,466 x 8
     ##    Individual      PC1     PC2     PC3    PC4 Population   colorNr symbolNr
     ##    <chr>         <dbl>   <dbl>   <dbl>  <dbl> <chr>        <chr>      <dbl>
-    ##  1 BOO001     -0.0052  -0.0166 -0.0032 0.0119 BolshoyOlen… black          0
-    ##  2 BOO001     -0.0052  -0.0166 -0.0032 0.0119 BolshoyOlen… black          1
-    ##  3 BOO001     -0.0052  -0.0166 -0.0032 0.0119 BolshoyOlen… black          2
-    ##  4 BOO001     -0.0052  -0.0166 -0.0032 0.0119 BolshoyOlen… black          3
-    ##  5 BOO001     -0.0052  -0.0166 -0.0032 0.0119 BolshoyOlen… black          4
-    ##  6 BOO001     -0.0052  -0.0166 -0.0032 0.0119 BolshoyOlen… black          5
-    ##  7 BOO002     -0.00480 -0.0159 -0.004  0.007  BolshoyOlen… black          0
-    ##  8 BOO002     -0.00480 -0.0159 -0.004  0.007  BolshoyOlen… black          1
-    ##  9 BOO002     -0.00480 -0.0159 -0.004  0.007  BolshoyOlen… black          2
-    ## 10 BOO002     -0.00480 -0.0159 -0.004  0.007  BolshoyOlen… black          3
-    ## # … with 1,490 more rows
+    ##  1 BOO001     -0.0052  -0.0166 -0.0032 0.0119 BolshoyOlen… black          1
+    ##  2 BOO002     -0.00480 -0.0159 -0.004  0.007  BolshoyOlen… black          1
+    ##  3 BOO003     -0.00480 -0.0164 -0.0042 0.0073 BolshoyOlen… black          1
+    ##  4 BOO004     -0.005   -0.0152 -0.0037 0.0089 BolshoyOlen… black          1
+    ##  5 BOO005     -0.0049  -0.0157 -0.0044 0.0061 BolshoyOlen… black          1
+    ##  6 BOO006     -0.0097  -0.0174 -0.003  0.0171 BolshoyOlen… black          1
+    ##  7 CHV001      0.0052  -0.0104 -0.005  0.0073 ChalmnyVarre black          2
+    ##  8 CHV002      0.00480 -0.0106 -0.005  0.0053 ChalmnyVarre black          2
+    ##  9 JK1963     -0.0052  -0.0098 -0.0032 0.0065 JK1963       black          3
+    ## 10 JK1967     -0.0038  -0.0148 -0.0039 0.0022 JK1967       black          4
+    ## # … with 1,456 more rows
 
 Here we can see, two more tidyverse tricks:
 
-1.  A 'pipe', indicated by `%>%`, from the `magrittr` package (included in dplyr). This works like in the terminal, and just says the output of the first function should be passed into the first argument position of the next function. This makes code much more readable going left to right step by step rather than 'nesting' of functions as we normally see in R.
+1.  A 'pipe', indicated by `%>%`, from the `magrittr` package (included in dplyr). This works like pipes (`|`) do in the terminal, and just says the output of the first function should be passed into the first argument position of the next function. This makes code much more readable going left to right step-by-step rather than 'nesting' of functions as we normally see in R.
 
 2.  We can simultaneously *assign* to a variable the output of a function, and print the final result by piping our join function into `print()`.
 
@@ -190,11 +194,11 @@ Next we want to 'hard-code' the order of populations as they are in in our raw d
 
 To hard code this we can convert the 'Population' column of our data from a *character* to *factor*. A factor is an object which allows you to hardcode the ordering of that list other than alphabetical order by setting your own hierarchy.
 
-As our loaded data is already in the order we want to plot (based on population similarity), we can use ta nifty function from the `forcats` package called `as_factor()` to generate our hierarchy based on the order row order that the Population column is already in.
+As our loaded data is already in the order we want to plot (based on population similarity), we can use a nifty function from the `forcats` package called `as_factor()` to generate our hierarchy based on the order row order that the Population column is already in.
 
 > Note that if your two data files do not have the same order in the Population column, the `left_join()` function we applied above will take the first tibble's (or left tibble) column order as precendence over the second! Make sure both are in the same order, or try `right_join()` instead.
 
-Again, using the tibble 'preview' functionality, we can check that the Population column type has changed from character (`chr`) to factor (`fctr`)
+Again, using the tibble 'preview' functionality, we can check that the Population column type has changed from character (`chr`) to factor (`fctr`).
 
 ``` r
 data_combined <- data_combined %>%
@@ -202,20 +206,20 @@ data_combined <- data_combined %>%
   print()
 ```
 
-    ## # A tibble: 1,500 x 8
+    ## # A tibble: 1,466 x 8
     ##    Individual      PC1     PC2     PC3    PC4 Population   colorNr symbolNr
     ##    <chr>         <dbl>   <dbl>   <dbl>  <dbl> <fct>        <chr>      <dbl>
-    ##  1 BOO001     -0.0052  -0.0166 -0.0032 0.0119 BolshoyOlen… black          0
-    ##  2 BOO001     -0.0052  -0.0166 -0.0032 0.0119 BolshoyOlen… black          1
-    ##  3 BOO001     -0.0052  -0.0166 -0.0032 0.0119 BolshoyOlen… black          2
-    ##  4 BOO001     -0.0052  -0.0166 -0.0032 0.0119 BolshoyOlen… black          3
-    ##  5 BOO001     -0.0052  -0.0166 -0.0032 0.0119 BolshoyOlen… black          4
-    ##  6 BOO001     -0.0052  -0.0166 -0.0032 0.0119 BolshoyOlen… black          5
-    ##  7 BOO002     -0.00480 -0.0159 -0.004  0.007  BolshoyOlen… black          0
-    ##  8 BOO002     -0.00480 -0.0159 -0.004  0.007  BolshoyOlen… black          1
-    ##  9 BOO002     -0.00480 -0.0159 -0.004  0.007  BolshoyOlen… black          2
-    ## 10 BOO002     -0.00480 -0.0159 -0.004  0.007  BolshoyOlen… black          3
-    ## # … with 1,490 more rows
+    ##  1 BOO001     -0.0052  -0.0166 -0.0032 0.0119 BolshoyOlen… black          1
+    ##  2 BOO002     -0.00480 -0.0159 -0.004  0.007  BolshoyOlen… black          1
+    ##  3 BOO003     -0.00480 -0.0164 -0.0042 0.0073 BolshoyOlen… black          1
+    ##  4 BOO004     -0.005   -0.0152 -0.0037 0.0089 BolshoyOlen… black          1
+    ##  5 BOO005     -0.0049  -0.0157 -0.0044 0.0061 BolshoyOlen… black          1
+    ##  6 BOO006     -0.0097  -0.0174 -0.003  0.0171 BolshoyOlen… black          1
+    ##  7 CHV001      0.0052  -0.0104 -0.005  0.0073 ChalmnyVarre black          2
+    ##  8 CHV002      0.00480 -0.0106 -0.005  0.0053 ChalmnyVarre black          2
+    ##  9 JK1963     -0.0052  -0.0098 -0.0032 0.0065 JK1963       black          3
+    ## 10 JK1967     -0.0038  -0.0148 -0.0039 0.0022 JK1967       black          4
+    ## # … with 1,456 more rows
 
 which is indeed the case.
 
@@ -223,7 +227,7 @@ which is indeed the case.
 
 With this dataframe, we have almost everything ready for plotting. In principle we could already plot our PCA. However, as mentioned in the introduction, we have the problem of having separate legends - one per 'aesthetic'.
 
-To deal with this issue, we need to collect more data from some of aesthetic columns from the Aesthetic data we loaded at the beginning. These allows us to 'hard-code' our colours and shapes to exactly as we want it (rather than ggplot2 randomly a assigning colours for us).
+To deal with this issue, we need to collect more data from some of aesthetic columns from the Aesthetic data we loaded at the beginning. These allows us to 'hard-code' our colours and shapes to exactly as we want it (rather than ggplot2 randomly assigning colours for us).
 
 To do this we need to make a 'named' vector, i.e. a list of a named keys (the population) and a value assigned to each key (the colour or shape you want that population to have). For example: `key1 = "value1", key2 = "value2"`
 
@@ -248,14 +252,14 @@ head(list_colour)
 
 > Note here I didn't use `print()`. This is because a named vector is a base R object, so using `print()` it would end up printing the entire contents of the object to screen. `head()` will only print the first few entries of any object.
 
-Plotting
---------
+Plotting with points
+--------------------
 
 So onto the plot itself. Following the [layered grammar of graphics](https://vita.had.co.nz/papers/layered-grammar.html) principles which the `ggplot2` package is based on, we will build our figures in the form of multiple layers that overlay each other.
 
 ### Blank Canvas
 
-The first step is provide the basic data that will inform the the various component of the plot. Then we specify the specific 'aesthetics' of the plot by supplying the columns that will inform the X and Y coordinates of each data point, what column we want to colour the points by, and so on to the `aes()` function.
+The first step is to provide the basic data that will inform the various components of the plot. Then we specify the specific 'aesthetics' of the plot by supplying the columns that will inform the X and Y coordinates of each data point, what column we want to colour the points by, and so on to the `aes()` function.
 
 ``` r
 ggplot(data = data_combined, 
@@ -323,7 +327,7 @@ ggplot(data = data_combined,
 
 ### Points Of Interest On Top?
 
-Unfortunately, in our Population column, we had the new individuals from the Lamnidis *et al.* study as the first few populations in the data. This then means that these individuals would be plotted first and ends up underneath other populations, despite being the ones we would like to emphasise the most. You can see this with JK1963 (the black asterix) falling beneath one of the green points near the centre of the plot.
+Unfortunately, in our Population column, we had the new individuals from the Lamnidis *et al.* study as the first few populations in the data. This then means that these individuals would be plotted first and end up underneath other populations, despite being the ones we would like to emphasise the most. You can see this with JK1963 (the black asterisk) falling beneath one of the green points near the centre of the plot.
 
 We can simply fix this by arranging the Population column in our data in reverse order. This will then cause the last Populations in the tibble to be printed first, and the ones at the top of the original data (the individuals of interest) first.
 
@@ -347,9 +351,9 @@ Now, we should see that the new individuals, in black, are printed last and thus
 
 ### Reversing Axes
 
-You may notice now we are getting close to recreating the original plot from Lamnidis *et al*.. One issue is that the ordination of the points, are flipped compared to the original plot - i.e. not in the classic 'genetic structure PCAs of Europeans match that of geographic positioning of the populations'.
+You may notice now we are getting close to recreating the original plot from Lamnidis *et al*.. One issue is that the ordination of the points, are flipped compared to the original plot - i.e. not in the classic 'PC orientation matches cardinal directions'.
 
-We can correct this in a similar fashion to how we re-ordered the way the plots are displayed, by reversing the column. However, as we don't want to override the ordering of the points based on the factors, we can use a little trick to reverse the axes. As the issue is basically the PCA algorthims randomly pick which postive or negative direction similar plots point, we can use convert minus values to positive and positive to minus by saying the *column itself* is negative (thus flipping all values). E.g. if we change `PC1` to `-PC1`, we should see a `-1` point on the X axis becoming `1` and vice versa.
+We can correct this in a similar fashion to how we re-ordered the way the plots are displayed, by flipping the sign of the column's contents. As the issue stems from the fact the PCA algorthims randomly pick the postive or negative direction in each PC, we can convert negative values to positive and positive to negative by taking the negative of the *column itself* (thus flipping the sign of all values). E.g. if we change `PC1` to `-PC1`, we should see a `-1` point on the X axis becoming `1` and vice versa.
 
 ``` r
 ggplot(data = data_combined %>% arrange(desc(Population)), 
@@ -363,9 +367,9 @@ ggplot(data = data_combined %>% arrange(desc(Population)),
 
 ### Reducing Ink
 
-A major inspiration for modern figure design is from Edward Tufte who had a overriding principle of 'minimising ink'. In the old days of printed material this saved resources and money, but also an additional benefit of making sure to minimise as much distraction away from the data as possible.
+A major inspiration for modern figure design is from [Edward Tufte](https://en.wikipedia.org/wiki/Edward_Tufte#Information_design) who has an overriding principle of 'minimising ink'. In the old days of printed material this saved resources and money, but also has an additional benefit of making sure to minimise as much distraction away from the data as possible.
 
-`ggplot2` provides a few additional 'global themes' along these lines. The closest one to the Lamnidis *et al*. paper is `theme_classic()`, which we can add as an extra aesthetic layer (although your remember your personal customisations retain precendence over this.)
+`ggplot2` provides a few additional 'global themes' along these lines. The closest one to the Lamnidis *et al*. paper is `theme_classic()`, which we can add as an extra aesthetic layer (although your remember your personal customisations retain precendence over this).
 
 ``` r
 ggplot(data = data_combined %>% arrange(desc(Population)), 
@@ -384,11 +388,11 @@ At the moment, the PCA looks a little cramped because the legend is so large. We
 
 Legends are known as 'guides' in `ggplot2`, so we can add another layer called `guides()` to indicate we want to customise this particular aspect of the plot. Within this layer, we don't need to use `aes()` as we don't want to customise by data columns themselves, but rather a user specified customisation that applies to every data point.
 
-The next bit is a bit complicated but bare with me.
+The next part is a bit complicated but bare with me.
 
 Within `guides()` we firstly need to specify which legend we want to customise. As we've actually 'collapsed' the two legends we would normally have: one for colour and one for shapes (as they use the same column), we can just pick the `colour` aesthetic variable.
 
-Within here we use a second function called `guide_legends()` which is used to translate the customisaion within the function to *just* to ones that are valid to legends. Here we specify we want 6 columns in the legend.
+Within here we use a second function called `guide_legends()`, which is used to translate the customisation within the function to *just* to ones that are valid to legends. Here we specify we want 6 columns in the legend.
 
 We also want to make the population labels in the legend smaller. For this we need to specify `label.theme()` so we customise only that aspect of the legend. We also need to use customisations that apply only to test, for this we use `element_text()` and set the size variable to the smaller font size.
 
@@ -406,10 +410,221 @@ ggplot(data_combined %>% arrange(desc(Population)),
 
 Now we have a much more equal plot to legend ratio.
 
+My legends are still to large! Text instead of points?
+------------------------------------------------------
+
+Now you may be thinking this is nice, except the legend is still way too big and takes up too much space e.g. when publishing in a journal article, report or thesis.
+
+### With `geom_text()`
+
+Instead, we could try and collapse the information of the coordinates on the PCA and the populations together by replacing the points on the PCA with the population actual names of the population each individual belongs to.
+
+This requires a few minor changes to our code, however following the same concepts as before.
+
+There are a few things we need to do: 1. Replace the `shape =` aesthetic (as we won't be using points anymore) to the `label =` varible. 2. Replace our `geom_point()` layer with `geom_text()` 3. Remove our `scale_shape_manual()` layer (as we aren't using the points) 4. Turn off the legend by removing `guides()`, and adding a new layer `theme()` at the end, and setting the variable `legend.position` to `"none"`. Note that `theme()` is a 'global' layer and applies to all legends, unlike `guides()` which allowed customisation of each particular legend.
+
+``` r
+ggplot(data_combined %>% arrange(desc(Population)), 
+       aes(-PC1, -PC2, colour = Population, label = Population)) + 
+  geom_text() + 
+  scale_colour_manual(values = list_colour) + 
+  theme_classic() +
+  theme(legend.position = "none")
+```
+
+![](Tidy_PopGen_PCA_Plotting_files/figure-markdown_github/unnamed-chunk-16-1.png)
+
+> Here I have just used the whole population name as recorded in the data and aesthetic files. It is common in population genetics to use three letter codes instead. We can easily apply the same thing here by adding a new column e.g. "Code" to the "aesthetics" input file we loaded at the beginning with the three letter codes, and changing the `colour` and `label` variable in `ggplot()` from "Population" to "Code"
+
+### With `geom_label()`
+
+This still isn't as clear as there is a lot of text and they are overlapping eachother into oblivion in some places. As an alternative, we can try using `geom_label()` instead of the `geom_text()` layer.
+
+``` r
+ggplot(data_combined %>% arrange(desc(Population)), 
+       aes(-PC1, -PC2, colour = Population, label = Population)) + 
+  geom_label() + 
+  scale_colour_manual(values = list_colour) + 
+  theme_classic() +
+  theme(legend.position = "none")
+```
+
+![](Tidy_PopGen_PCA_Plotting_files/figure-markdown_github/unnamed-chunk-17-1.png)
+
+### Fixing overplotting
+
+This is better as we can read the text, but we still have a lot of overlapping points.
+
+One final option we have is make two layers, one text for the background points, and then another layer of points for the new individuals. This way we can see at fine resolution where the new individuals fall, but on top of the general population it falls in.
+
+This requires a slightly more complex procedure, as we don't want to plot the new individuals with `geom_text()` at the same time as the comparative populations - as we won't be able to see the black points in the overplotted labels of those individuals.
+
+#### Extra data manipulation
+
+Therefore, we need to supply 'filtered' data to both layers, and apply the aesthetics to each layer independently.
+
+For filtering, we need to make a record of the new populations which we want to plot on the new layer. We can record these in a vector:
+
+``` r
+new_pops <- c("BolshoyOleniOstrov", "ChalmnyVarre", "JK1963", "JK1967", 
+              "Levanluhta", "JK2065", "JK2066", "JK2067", "ModernSaami")
+```
+
+Next, we need to split our data into two: one for the background, one for the foreground - using our new vector within `dlpyr`'s `filter()` function in combination with the conditional expression function `%in%`.
+
+The way this works is :
+
+1.  we pipe our data into `filter()`
+2.  Say which column of our data we want to apply the filter on.
+3.  Say how we want to filter. In the first case, we want to find any row in our filtering column that matches any entry `%in%` our vector.
+4.  Print the resulting tibble to check we see have only those individuals
+
+``` r
+data_foreground <- data_combined %>% 
+  filter(Population %in% new_pops) %>% 
+  print()
+```
+
+    ## # A tibble: 16 x 8
+    ##    Individual      PC1     PC2     PC3     PC4 Population  colorNr symbolNr
+    ##    <chr>         <dbl>   <dbl>   <dbl>   <dbl> <fct>       <chr>      <dbl>
+    ##  1 BOO001     -0.0052  -0.0166 -0.0032  0.0119 BolshoyOle… black          1
+    ##  2 BOO002     -0.00480 -0.0159 -0.004   0.007  BolshoyOle… black          1
+    ##  3 BOO003     -0.00480 -0.0164 -0.0042  0.0073 BolshoyOle… black          1
+    ##  4 BOO004     -0.005   -0.0152 -0.0037  0.0089 BolshoyOle… black          1
+    ##  5 BOO005     -0.0049  -0.0157 -0.0044  0.0061 BolshoyOle… black          1
+    ##  6 BOO006     -0.0097  -0.0174 -0.003   0.0171 BolshoyOle… black          1
+    ##  7 CHV001      0.0052  -0.0104 -0.005   0.0073 ChalmnyVar… black          2
+    ##  8 CHV002      0.00480 -0.0106 -0.005   0.0053 ChalmnyVar… black          2
+    ##  9 JK1963     -0.0052  -0.0098 -0.0032  0.0065 JK1963      black          3
+    ## 10 JK1967     -0.0038  -0.0148 -0.0039  0.0022 JK1967      black          4
+    ## 11 JK1968      0.00480 -0.0091 -0.0047  0.0036 Levanluhta  black          5
+    ## 12 JK1970      0.0022  -0.0115 -0.0042  0.0094 Levanluhta  black          5
+    ## 13 JK2065      0.0153  -0.0052 -0.0056 -0.0043 JK2065      black          6
+    ## 14 JK2066      0.0061  -0.0019 -0.0042  0.0042 JK2066      black          7
+    ## 15 JK2067      0.0017   0.0049 -0.0037  0.0347 JK2067      black          8
+    ## 16 Saami001    0.0059  -0.0107 -0.0063  0.0078 ModernSaami black          9
+
+And as expected, we see we now only have 16 rows in this new `tibble`.
+
+Next we want to do the same filtering but this time inverted - i.e. keep everything that is *not* the new individuals. For this we can just add `!` to the beginning of the expression.
+
+``` r
+data_background <- data_combined %>% 
+  filter(!Population %in% new_pops) %>% 
+  print()
+```
+
+    ## # A tibble: 1,450 x 8
+    ##    Individual     PC1      PC2     PC3      PC4 Population colorNr symbolNr
+    ##    <chr>        <dbl>    <dbl>   <dbl>    <dbl> <fct>      <chr>      <dbl>
+    ##  1 HG00171     0.0112 -0.0081  -0.0066  6.00e-4 Finnish    purple4        0
+    ##  2 HG00174     0.0131 -0.006   -0.0057 -2.40e-3 Finnish    purple4        0
+    ##  3 HG00190     0.0128 -0.0053  -0.0059 -1.00e-4 Finnish    purple4        0
+    ##  4 HG00266     0.0122 -0.0067  -0.0059 -1.60e-3 Finnish    purple4        0
+    ##  5 HG00183     0.0115 -0.0067  -0.0056 -8.00e-4 Finnish    purple4        0
+    ##  6 HG00173     0.0121 -0.007   -0.0063 -1.20e-3 Finnish    purple4        0
+    ##  7 HG00181     0.013  -0.00480 -0.004   1.00e-3 Finnish    purple4        0
+    ##  8 HG00182     0.0116 -0.0078  -0.0059  1.00e-4 Finnish    purple4        0
+    ##  9 S_Saami-1.… 0.0055 -0.0101  -0.0056  3.80e-3 Saami.DG   purple4        1
+    ## 10 S_Saami-2.… 0.0036 -0.0109  -0.0051  9.30e-3 Saami.DG   purple4        1
+    ## # … with 1,440 more rows
+
+#### Plotting two layers
+
+Back with `ggplot2` we can plot the two layers independently by moving the new sets of input data from the `ggplot` function to the `geom_*` layers (leaving `ggplot()` empty), along with their corresponding aesthetics (which we borrow from above - such as `scale_shape_manual()`).
+
+``` r
+ggplot() + 
+  geom_text(data = data_background, aes(x = -PC1, y = -PC2, colour = Population, label = Population)) + 
+  geom_point(data = data_foreground, aes(x = -PC1, y = -PC2, colour = Population, shape = Population)) +
+  scale_colour_manual(values = list_colour) + 
+  scale_shape_manual(values = list_shape) +
+  theme_classic() +
+  theme(legend.position = "none")
+```
+
+![](Tidy_PopGen_PCA_Plotting_files/figure-markdown_github/unnamed-chunk-21-1.png)
+
+This is getting slightly better, however it's still a bit difficult to see the points over the populatons. We can improve on this by reducing the 'strength' of the colours of the background populations, but also make the points of our new individuals bigger.
+
+For the former, we can add an extra variable to the `geom_text()` layer called `alpha` which sets a transparency level to the text. In this case we will *not* put this within `aes()`, as we don't want the data to inform level of transparency, but rather we want to hard code this to apply to all populations.
+
+``` r
+ggplot() + 
+  geom_text(data = data_background, 
+            aes(x = -PC1, y = -PC2, colour = Population, label = Population), 
+            alpha = 0.4) + 
+  geom_point(data = data_foreground, 
+             aes(x = -PC1, y = -PC2, colour = Population, shape = Population)) +
+  scale_colour_manual(values = list_colour) + 
+  scale_shape_manual(values = list_shape) +
+  theme_classic() +
+  theme(legend.position = "none")
+```
+
+![](Tidy_PopGen_PCA_Plotting_files/figure-markdown_github/unnamed-chunk-22-1.png)
+
+Now we will change the `size` of the points within the `geom_point()` layer, again *outside* the aeshetics as we want to hard code this to apply to all points.
+
+``` r
+ggplot() + 
+  geom_text(data = data_background, 
+            aes(x = -PC1, y = -PC2, colour = Population, label = Population), 
+            alpha = 0.4) + 
+  geom_point(data = data_foreground, 
+             aes(x = -PC1, y = -PC2, colour = Population, shape = Population), 
+             size = 2) +
+  scale_colour_manual(values = list_colour) + 
+  scale_shape_manual(values = list_shape) +
+  theme_classic() +
+  theme(legend.position = "none")
+```
+
+![](Tidy_PopGen_PCA_Plotting_files/figure-markdown_github/unnamed-chunk-23-1.png)
+
+We can also improve the points visibility by making the lines of the shapes thicker by increasing the `stroke` variable.
+
+``` r
+ggplot() + 
+  geom_text(data = data_background, 
+            aes(x = -PC1, y = -PC2, colour = Population, label = Population), 
+            alpha = 0.4) + 
+  geom_point(data = data_foreground, 
+             aes(x = -PC1, y = -PC2, colour = Population, shape = Population), 
+             size = 2, stroke = 0.7) +
+  scale_colour_manual(values = list_colour) + 
+  scale_shape_manual(values = list_shape) +
+  theme_classic() +
+  theme(legend.position = "none")
+```
+
+![](Tidy_PopGen_PCA_Plotting_files/figure-markdown_github/unnamed-chunk-24-1.png)
+
+Finally, while we can (sort of) see the names of the reference populations, we have no idea which populations the points of the new individuals refer to. For this we can add the legend back in (as it's comparatively few populations compared to the comparative data), however we need to make sure we only show the legend for the `geom_point()` layer.
+
+We can remove the `theme()` layer because it was a 'global' layer and we want to now tweak different legends, and replace it with `guides()` again.
+
+``` r
+ggplot() + 
+  geom_text(data = data_background, 
+            aes(x = -PC1, y = -PC2, colour = Population, label = Population), 
+            alpha = 0.4) + 
+  geom_point(data = data_foreground, 
+             aes(x = -PC1, y = -PC2, colour = Population, shape = Population), 
+             size = 2, stroke = 0.7) +
+  scale_colour_manual(values = list_colour) + 
+  scale_shape_manual(values = list_shape) +
+  theme_classic() +
+  guides(color = FALSE, size = FALSE)
+```
+
+![](Tidy_PopGen_PCA_Plotting_files/figure-markdown_github/unnamed-chunk-25-1.png)
+
 Now over to you!
 ----------------
 
-The steps above are generally applicable to most scatter-plot like data, thus in principle if you open this notebook in Rstudio yourself, and change each code block to your own specifications - whether changing the order of the axes, or instead plotting PC2 and PC3 - you will generate a nice clear plot as above but with your data instead.
+The steps above are generally applicable to most scatter-plot like data, thus in principle if you open this notebook in Rstudio yourself, and change each code block to your own specifications - whether changing the order of the axes, or instead plotting PC2 and PC3 - you will generate a nice clear plot as above, but with your data instead.
 
 The main thing to remember is that your input data that you load into the R session should have your Population column in the order you want the points to be displayed in. Otherwise, just compare your input data to the ones included in this repository and follow the same formatting of the data.
 
