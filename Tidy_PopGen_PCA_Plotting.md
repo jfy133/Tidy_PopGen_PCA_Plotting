@@ -19,6 +19,7 @@ March 2019
     -   [Reversing Axes](#reversing-axes)
     -   [Reducing Ink](#reducing-ink)
     -   [Fixing Large Legends](#fixing-large-legends)
+    -   [Saving your plot](#saving-your-plot)
 -   [My legends are still to large! Text instead of points?](#my-legends-are-still-to-large-text-instead-of-points)
     -   [With `geom_text()`](#with-geom_text)
     -   [With `geom_label()`](#with-geom_label)
@@ -410,6 +411,37 @@ ggplot(data_combined %>% arrange(desc(Population)),
 
 Now we have a much more equal plot to legend ratio.
 
+### Saving your plot
+
+To save your plot, it's safest if you use the `ggplot2` function `ggsave()`.
+
+Firstly we need to store the plot in an object.
+
+``` r
+pca_plot <- ggplot(data_combined %>% arrange(desc(Population)), 
+       aes(-PC1, -PC2, colour = Population, shape = Population)) + 
+  geom_point() + 
+  scale_colour_manual(values = list_colour) + 
+  scale_shape_manual(values = list_shape) +
+  guides(colour = guide_legend(ncol = 6, label.theme = element_text(size = 7))) +
+  theme_classic()
+```
+
+And now we run ggsave. I recommend using `cairo_pdf` as the device (if you have it installed - try running the command below to see if it works first), as the default `pdf` library for saving doesn't save text in plots as text but paths. The problem with this is if you want to modify the image text afterwards in a vector image editor - you can't e.g. change the font size.
+
+Otherwise I set the saved image with 7 inches x 14 inches, and indicated I want to save the image in the directory I'm already in by setting `path` to `"."`
+
+``` r
+ggsave(filename = "Lamnidis_2018_PCA_Figure2a.pdf",
+       plot = pca_plot,
+       device = cairo_pdf,
+       path = ".",
+       width = 14,
+       height = 7, 
+       units = "in",
+       dpi = 600)
+```
+
 My legends are still to large! Text instead of points?
 ------------------------------------------------------
 
@@ -432,7 +464,7 @@ ggplot(data_combined %>% arrange(desc(Population)),
   theme(legend.position = "none")
 ```
 
-![](Tidy_PopGen_PCA_Plotting_files/figure-markdown_github/unnamed-chunk-16-1.png)
+![](Tidy_PopGen_PCA_Plotting_files/figure-markdown_github/unnamed-chunk-18-1.png)
 
 > Here I have just used the whole population name as recorded in the data and aesthetic files. It is common in population genetics to use three letter codes instead. We can easily apply the same thing here by adding a new column e.g. "Code" to the "aesthetics" input file we loaded at the beginning with the three letter codes, and changing the `colour` and `label` variable in `ggplot()` from "Population" to "Code"
 
@@ -449,7 +481,7 @@ ggplot(data_combined %>% arrange(desc(Population)),
   theme(legend.position = "none")
 ```
 
-![](Tidy_PopGen_PCA_Plotting_files/figure-markdown_github/unnamed-chunk-17-1.png)
+![](Tidy_PopGen_PCA_Plotting_files/figure-markdown_github/unnamed-chunk-19-1.png)
 
 ### Fixing overplotting
 
@@ -544,7 +576,7 @@ ggplot() +
   theme(legend.position = "none")
 ```
 
-![](Tidy_PopGen_PCA_Plotting_files/figure-markdown_github/unnamed-chunk-21-1.png)
+![](Tidy_PopGen_PCA_Plotting_files/figure-markdown_github/unnamed-chunk-23-1.png)
 
 This is getting slightly better, however it's still a bit difficult to see the points over the populatons. We can improve on this by reducing the 'strength' of the colours of the background populations, but also make the points of our new individuals bigger.
 
@@ -563,7 +595,7 @@ ggplot() +
   theme(legend.position = "none")
 ```
 
-![](Tidy_PopGen_PCA_Plotting_files/figure-markdown_github/unnamed-chunk-22-1.png)
+![](Tidy_PopGen_PCA_Plotting_files/figure-markdown_github/unnamed-chunk-24-1.png)
 
 Now we will change the `size` of the points within the `geom_point()` layer, again *outside* the aeshetics as we want to hard code this to apply to all points.
 
@@ -581,7 +613,7 @@ ggplot() +
   theme(legend.position = "none")
 ```
 
-![](Tidy_PopGen_PCA_Plotting_files/figure-markdown_github/unnamed-chunk-23-1.png)
+![](Tidy_PopGen_PCA_Plotting_files/figure-markdown_github/unnamed-chunk-25-1.png)
 
 We can also improve the points visibility by making the lines of the shapes thicker by increasing the `stroke` variable.
 
@@ -599,7 +631,7 @@ ggplot() +
   theme(legend.position = "none")
 ```
 
-![](Tidy_PopGen_PCA_Plotting_files/figure-markdown_github/unnamed-chunk-24-1.png)
+![](Tidy_PopGen_PCA_Plotting_files/figure-markdown_github/unnamed-chunk-26-1.png)
 
 Finally, while we can (sort of) see the names of the reference populations, we have no idea which populations the points of the new individuals refer to. For this we can add the legend back in (as it's comparatively few populations compared to the comparative data), however we need to make sure we only show the legend for the `geom_point()` layer.
 
@@ -619,7 +651,7 @@ ggplot() +
   guides(color = FALSE, size = FALSE)
 ```
 
-![](Tidy_PopGen_PCA_Plotting_files/figure-markdown_github/unnamed-chunk-25-1.png)
+![](Tidy_PopGen_PCA_Plotting_files/figure-markdown_github/unnamed-chunk-27-1.png)
 
 Now over to you!
 ----------------
