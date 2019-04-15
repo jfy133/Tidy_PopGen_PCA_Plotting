@@ -420,6 +420,45 @@ ggplot(data_combined %>% arrange(desc(Population)),
 
 Now we have a much more equal plot to legend ratio.
 
+### Saving your plot
+
+To save your plot, it's safest if you use the `ggplot2` function `ggsave()`.
+
+Firstly we need to store the plot in an object.
+
+```{r}
+pca_plot <- ggplot(data_combined %>% arrange(desc(Population)), 
+       aes(-PC1, -PC2, colour = Population, shape = Population)) + 
+  geom_point() + 
+  scale_colour_manual(values = list_colour) + 
+  scale_shape_manual(values = list_shape) +
+  guides(colour = guide_legend(ncol = 6, label.theme = element_text(size = 7))) +
+  theme_classic()
+```
+
+
+And now we run ggsave. I recommend using `cairo_pdf` as the device (if 
+you have it installed - try running the command below to see if it works first),
+as the default `pdf` library for saving doesn't save text in plots as text but
+paths. The problem with this is if you want to modify the image text afterwards
+in a vector image editor - you can't e.g. change the font size.
+
+Otherwise I set the saved image with 7 inches x 14 inches, and indicated
+I want to save the image in the directory I'm already in  by setting `path` 
+to `"."`
+
+```{r}
+ggsave(filename = "Lamnidis_2018_PCA_Figure2a.pdf",
+       plot = pca_plot,
+       device = cairo_pdf,
+       path = ".",
+       width = 14,
+       height = 7, 
+       units = "in",
+       dpi = 600)
+```
+
+
 ## My legends are still to large! Text instead of points?
 
 Now you may be thinking this is nice, except the legend is still way too big
